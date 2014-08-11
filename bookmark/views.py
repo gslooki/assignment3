@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-# Import the Category model
 from bookmark.models import Category
 from bookmark.models import Page
 from bookmark.forms import PageForm
@@ -39,7 +38,7 @@ def category(request, category_name_url):
 
     # Create a context dictionary which we can pass to the template rendering engine.
     # We start by containing the name of the category passed by the user.
-    context_dict = {'category_name': category_name}
+    context_dict = {'category_name': category_name, 'category_name_url' : category_name_url}
 
     try:
         # Can we find a category with the given name?
@@ -88,8 +87,24 @@ def add_category(request):
     else:
         # If the request was not a POST, display the form to enter details.
         form = CategoryForm()
-
-    # Bad form (or form details), no form supplied...
-    # Render the form with error messages (if any).
     return render_to_response('bookmark/add_category.html', {'form': form}, context)
   
+def add_page(request, category_name_url):
+    context = RequestContext(request)
+     # Get the context from the request.
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            form.save(commit=True)
+            return index(request)
+        
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print form.errors
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = PageForm()
+    return render_to_response('bookmark/add_page.html', {'form': form, 'category_name_url':category_name_url}, context)
