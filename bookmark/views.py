@@ -98,6 +98,7 @@ def add_page(request, category_name_url):
 
         # Have we been provided with a valid form?
         if form.is_valid():
+            form.category  = Category.objects.get(name = categoryname)
             form.save(commit=True)
             return index(request)
         
